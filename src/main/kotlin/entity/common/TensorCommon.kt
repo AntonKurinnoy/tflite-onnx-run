@@ -1,4 +1,7 @@
-package entity
+package entity.common
+
+import enums.Processor
+import enums.TensorType
 
 /**
  * @author Anton Kurinnoy
@@ -9,8 +12,3 @@ data class Tensor(
     val shape: Array<Int>,
     val data: Any
 )
-
-
-enum class TensorType { FACE_RECOGNITION, FACE_DETECTION, FACE_LIVENESS_SCORE }
-
-enum class Processor { TFLITE, ONNX }
