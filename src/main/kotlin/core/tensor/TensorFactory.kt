@@ -25,12 +25,7 @@ object TensorFactory {
             }
         }
 
-        val byteBuffer = ByteBuffer.allocate(4)
-        byteBuffer.order(ByteOrder.nativeOrder())
-        floatArray.forEach { byteBuffer.put(it.toRawBits().toByte()) }
-        byteBuffer.position(0)
-
-        return Tensor(intArrayOf(1, 3, image.width, image.height), byteBuffer, TensorType.FLOAT)
+        return create(intArrayOf(1, 3, image.width, image.height), floatArray)
     }
 
     fun create(shape: Shape, data: Float): Tensor {
