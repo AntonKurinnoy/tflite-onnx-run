@@ -28,11 +28,11 @@ class OnnxProcessor(private val model: ByteArray) : Processor {
 
         val inputMap = mutableMapOf<String, OnnxTensor>()
 
-        session.inputNames.forEach { name ->
+        session.inputNames.forEachIndexed { index, name ->
             val inputTensor = OnnxTensor.createTensor(
                 env,
-                FloatBuffer.wrap((input[0] as FloatTensor).data),
-                (input[0] as FloatTensor).shape.map { it.toLong() }.toLongArray()
+                FloatBuffer.wrap((input[index] as FloatTensor).data),
+                (input[index] as FloatTensor).shape.map { it.toLong() }.toLongArray()
             )
             inputMap[name] = inputTensor
         }
