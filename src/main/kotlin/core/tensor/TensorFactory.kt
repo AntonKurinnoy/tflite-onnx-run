@@ -2,12 +2,14 @@ package core.tensor
 
 import java.awt.Color
 import java.awt.image.BufferedImage
+import java.nio.ByteBuffer
+import java.nio.ByteOrder
 
 /**
  * @author Anton Kurinnoy
  */
 object TensorFactory {
-    fun fromImage(image: BufferedImage): FloatTensor {
+    fun fromImage(image: BufferedImage): Tensor {
         val width = image.width
         val height = image.height
         val floatArray = FloatArray(3 * width * height)
@@ -22,6 +24,32 @@ object TensorFactory {
                 floatArray[2 * width * height + y * width + x] = color.blue / 255.0f
             }
         }
-        return FloatTensor(intArrayOf(1,3,image.width, image.height), floatArray)
+
+        val byteBuffer = ByteBuffer.allocate(4)
+        byteBuffer.order(ByteOrder.nativeOrder())
+        floatArray.forEach { byteBuffer.put(it.toRawBits().toByte()) }
+        byteBuffer.position(0)
+
+        return Tensor(intArrayOf(1, 3, image.width, image.height), byteBuffer, TensorType.FLOAT)
+    }
+
+    fun create(shape: Shape, data: Float): Tensor {
+        val byteBuffer = ByteBuffer.allocate(4)
+        byteBuffer.order(ByteOrder.nativeOrder())
+        byteBuffer.put(data.toRawBits().toByte())
+
+        byteBuffer.position(0)
+
+        return Tensor(shape, byteBuffer, TensorType.FLOAT)
+    }
+
+    fun create(shape: Shape, data: FloatArray): Tensor {
+        val byteBuffer = ByteBuffer.allocate(4 * data.size)
+        byteBuffer.order(ByteOrder.nativeOrder())
+
+        data.forEach { byteBuffer.put(it.toRawBits().toByte()) }
+        byteBuffer.position(0)
+
+        return Tensor(shape, byteBuffer, TensorType.FLOAT)
     }
 }

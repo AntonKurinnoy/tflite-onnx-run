@@ -1,25 +1,14 @@
 package core.tensor
 
+import java.nio.ByteBuffer
+
 /**
  * @author Anton Kurinnoy
  */
-interface Tensor {
-    val shape: IntArray
-    val data: Any
-}
+data class Tensor(val shape: Shape, val data: ByteBuffer, val type: TensorType)
 
-class FloatTensor(override val shape: IntArray, override val data: FloatArray) : Tensor {
-    companion object {
-        fun create(shape: IntArray): FloatTensor {
-            val size = shape.reduce { acc, i -> acc * i }
-            val data = FloatArray(size)
-            return FloatTensor(shape, data)
-        }
+typealias Shape = IntArray
 
-        fun create(shape: IntArray, data: FloatArray): FloatTensor {
-            return FloatTensor(shape, data)
-        }
-    }
-}
+enum class TensorType { INT, FLOAT }
 
 
