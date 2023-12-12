@@ -4,44 +4,45 @@ import ai.onnxruntime.OnnxTensor
 import ai.onnxruntime.OrtEnvironment
 import ai.onnxruntime.OrtSession
 import core.processor.Processor
-import core.tensor.FloatTensor
 import core.tensor.Tensor
-import java.nio.FloatBuffer
 
 /**
  * @author Anton Kurinnoy
  */
-class OnnxProcessor(private val model: ByteArray) : Processor {
+class OnnxProcessor(model: ByteArray) : Processor {
 
-    private lateinit var env: OrtEnvironment
-    private lateinit var session: OrtSession
+    private val session: OrtSession = OrtEnvironment.getEnvironment().createSession(model)
 
     override fun initialize() {
-        env = OrtEnvironment.getEnvironment()
-        session = env.createSession(model)
+        TODO()
     }
 
     override fun run(input: Map<Int, Tensor>, output: MutableMap<Int, Tensor>) {
-        if (!::session.isInitialized) {
-            throw IllegalStateException("Session is not initialized. Call initialize() first.")
+        if (input.keys.max() > session.inputNames.size) {
+            throw IllegalArgumentException("Illegal index:${input.keys.max()}")
         }
 
-        val inputMap = mutableMapOf<String, OnnxTensor>()
-
-        session.inputNames.forEachIndexed { index, name ->
-            val inputTensor = OnnxTensor.createTensor(
-                env,
-                FloatBuffer.wrap((input[index] as FloatTensor).data),
-                (input[index] as FloatTensor).shape.map { it.toLong() }.toLongArray()
+        val onnxInputTensors = mutableMapOf<String, OnnxTensor>()
+        input.forEach { (index, inputTensor) ->
+            val onnxInputTensor = OnnxTensor.createTensor(
+                OrtEnvironment.getEnvironment(),
+                inputTensor.data.asFloatBuffer(),
+                inputTensor.shape.toOnnxShape()
             )
-            inputMap[name] = inputTensor
+            onnxInputTensors[session.inputNames.elementAt(index)] = onnxInputTensor
         }
 
-        val results = session.run(inputMap)
+        val results = session.run(onnxInputTensors)
 
         results.forEachIndexed { index, mutableEntry ->
-            output[index] = mutableEntry as Tensor
+            val inputTensor = input[index]
+            val data = (mutableEntry as OnnxTensor).byteBuffer
+            output[index] = Tensor(inputTensor!!.shape, data, inputTensor.type)
         }
 
+    }
+
+    override fun close() {
+        session.close()
     }
 }
