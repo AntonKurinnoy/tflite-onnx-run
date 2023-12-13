@@ -1,11 +1,11 @@
 package core.tensor
 
-import java.nio.ByteBuffer
+import java.nio.Buffer
 
 /**
  * @author Anton Kurinnoy
  */
-data class Tensor(val shape: Shape, val data: ByteBuffer, val type: TensorType)
+data class Tensor(val shape: Shape, val data: Buffer, val type: TensorType)
 
 typealias Shape = IntArray
 

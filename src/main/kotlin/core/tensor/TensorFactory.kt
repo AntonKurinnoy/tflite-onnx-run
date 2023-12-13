@@ -2,8 +2,7 @@ package core.tensor
 
 import java.awt.Color
 import java.awt.image.BufferedImage
-import java.nio.ByteBuffer
-import java.nio.ByteOrder
+import java.nio.FloatBuffer
 
 /**
  * @author Anton Kurinnoy
@@ -29,22 +28,16 @@ object TensorFactory {
     }
 
     fun create(shape: Shape, data: Float): Tensor {
-        val byteBuffer = ByteBuffer.allocate(4)
-        byteBuffer.order(ByteOrder.nativeOrder())
-        byteBuffer.put(data.toRawBits().toByte())
+        val floatBuffer = FloatBuffer.allocate(1)
+        floatBuffer.put(data)
 
-        byteBuffer.position(0)
-
-        return Tensor(shape, byteBuffer, TensorType.FLOAT)
+        return Tensor(shape, floatBuffer, TensorType.FLOAT)
     }
 
     fun create(shape: Shape, data: FloatArray): Tensor {
-        val byteBuffer = ByteBuffer.allocate(4 * data.size)
-        byteBuffer.order(ByteOrder.nativeOrder())
+        val floatBuffer = FloatBuffer.allocate(data.size)
+        floatBuffer.put(data)
 
-        data.forEach { byteBuffer.put(it.toRawBits().toByte()) }
-        byteBuffer.position(0)
-
-        return Tensor(shape, byteBuffer, TensorType.FLOAT)
+        return Tensor(shape, floatBuffer, TensorType.FLOAT)
     }
 }
