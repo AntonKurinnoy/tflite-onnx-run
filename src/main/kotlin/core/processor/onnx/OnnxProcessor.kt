@@ -5,6 +5,7 @@ import ai.onnxruntime.OrtEnvironment
 import ai.onnxruntime.OrtSession
 import core.processor.Processor
 import core.tensor.Tensor
+import java.nio.ByteBuffer
 
 /**
  * @author Anton Kurinnoy
@@ -14,32 +15,32 @@ class OnnxProcessor(model: ByteArray) : Processor {
     private val session: OrtSession = OrtEnvironment.getEnvironment().createSession(model)
 
     override fun initialize() {
-        TODO()
     }
 
     override fun run(input: Map<Int, Tensor>, output: MutableMap<Int, Tensor>) {
-        if (input.keys.max() > session.inputNames.size) {
+        if (input.keys.max() >= session.numInputs) {
             throw IllegalArgumentException("Illegal index:${input.keys.max()}")
         }
 
-        val onnxInputTensors = mutableMapOf<String, OnnxTensor>()
-        input.forEach { (index, inputTensor) ->
+        val onnxInputTensors = input.map { (index, inputTensor) ->
+            if (!inputTensor.data.hasArray()) {
+                throw IllegalArgumentException("Input tensor doesn't have array data")
+            }
             val onnxInputTensor = OnnxTensor.createTensor(
                 OrtEnvironment.getEnvironment(),
-                inputTensor.data.asFloatBuffer(),
+                inputTensor.data.array() as ByteBuffer,
                 inputTensor.shape.toOnnxShape()
             )
-            onnxInputTensors[session.inputNames.elementAt(index)] = onnxInputTensor
-        }
+            session.inputNames.elementAt(index) to onnxInputTensor
+        }.toMap()
 
         val results = session.run(onnxInputTensors)
 
-        results.forEachIndexed { index, mutableEntry ->
+        for ((index, value) in results.withIndex()) {
             val inputTensor = input[index]
-            val data = (mutableEntry as OnnxTensor).byteBuffer
+            val data = (value as OnnxTensor).byteBuffer
             output[index] = Tensor(inputTensor!!.shape, data, inputTensor.type)
         }
-
     }
 
     override fun close() {
