@@ -5,7 +5,9 @@ import ai.onnxruntime.OrtEnvironment
 import ai.onnxruntime.OrtSession
 import core.processor.Processor
 import core.tensor.Tensor
-import java.nio.ByteBuffer
+import core.tensor.TensorType
+import java.nio.FloatBuffer
+import java.nio.IntBuffer
 
 /**
  * @author Anton Kurinnoy
@@ -23,15 +25,7 @@ class OnnxProcessor(model: ByteArray) : Processor {
         }
 
         val onnxInputTensors = input.map { (index, inputTensor) ->
-            if (!inputTensor.data.hasArray()) {
-                throw IllegalArgumentException("Input tensor doesn't have array data")
-            }
-            val onnxInputTensor = OnnxTensor.createTensor(
-                OrtEnvironment.getEnvironment(),
-                inputTensor.data.array() as ByteBuffer,
-                inputTensor.shape.toOnnxShape()
-            )
-            session.inputNames.elementAt(index) to onnxInputTensor
+            session.inputNames.elementAt(index) to createOnnxTensor(inputTensor)
         }.toMap()
 
         val results = session.run(onnxInputTensors)
@@ -45,5 +39,25 @@ class OnnxProcessor(model: ByteArray) : Processor {
 
     override fun close() {
         session.close()
+    }
+
+    private fun createOnnxTensor(inputTensor: Tensor): OnnxTensor {
+        if (!inputTensor.data.hasArray()) {
+            throw IllegalArgumentException("Input tensor doesn't have array data")
+        }
+
+        return when (inputTensor.type) {
+            TensorType.INT -> OnnxTensor.createTensor(
+                OrtEnvironment.getEnvironment(),
+                inputTensor.data.array() as IntBuffer,
+                inputTensor.shape.toOnnxShape()
+            )
+
+            TensorType.FLOAT -> OnnxTensor.createTensor(
+                OrtEnvironment.getEnvironment(),
+                inputTensor.data.array() as FloatBuffer,
+                inputTensor.shape.toOnnxShape()
+            )
+        }
     }
 }
