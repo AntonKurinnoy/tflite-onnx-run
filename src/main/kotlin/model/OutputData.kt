@@ -4,7 +4,7 @@ package model
  * @author Anton Kurinnoy
  */
 data class Output(
-    val type: String,
+    val type: OUTPUT_TYPE,
     val data: OutputData
 )
 
@@ -32,3 +32,5 @@ data class DeePixBiSOutputData(
 enum class SCORE_ALGORITHM { L2NORM, COSNORM }
 
 enum class BBOX_TYPE { BBOX_ULURWH, BBOX_ULURBLBR, BBOX_CXCYWH }
+
+enum class OUTPUT_TYPE { SCORES_BOXES, TEMPLATE, MASK, MASK_SCORE }
