@@ -2,9 +2,10 @@ package runner
 
 import core.processor.onnx.OnnxProcessor
 import core.processor.tflite.TfLiteProcessor
+import core.tensor.Tensor
 import core.tensor.TensorFactory
 import core.translator.Translator
-import model.Model
+import model.PROCESSOR_TYPE
 
 
 /**
@@ -12,44 +13,41 @@ import model.Model
  */
 class Runner<I, O>(builder: Builder<I, O>) {
 
-    private var inputClass: Class<I>
-    private var outputClass: Class<O>
+    private var processor: PROCESSOR_TYPE
     private var model: ByteArray
-    private var input: I
     private var translator: Translator<I, O>
-    private var modelParams: Model
 
     init {
-        this.inputClass = builder.inputClass!!
-        this.outputClass = builder.outputClass!!
+        this.processor = builder.processor
         this.model = builder.model
-        this.input = builder.input ?: throw IllegalArgumentException("Input must be set")
         this.translator = builder.translator
-        this.modelParams = builder.modelParams
     }
 
-    fun getResult(): O {
-        val inputData = translator.preProcessInput(this.input)
-        val processor = when (modelParams.processor) {
-            "ONNX" -> OnnxProcessor(this.model)
-            "TFLITE" -> TfLiteProcessor(this.model)
-            else -> throw IllegalArgumentException("Processor type ${modelParams.processor} wasn't found")
+    fun getResult(input: I): O {
+        val inputData = translator.preProcessInput(input)
+
+        val processor = when (this.processor) {
+            PROCESSOR_TYPE.ONNX -> OnnxProcessor(this.model)
+            PROCESSOR_TYPE.TFLITE -> TfLiteProcessor(this.model)
         }
         processor.initialize()
-        val outputTensor = TensorFactory.create(modelParams.input.data.shape, floatArrayOf())
-        val outputData = mutableMapOf(0 to outputTensor)
+
+        val outputData = mutableMapOf<Int, Tensor>()
+        inputData.forEach { (index, tensor) ->
+            val outputTensor = TensorFactory.create(tensor.shape, floatArrayOf())
+            outputData[index] = outputTensor
+        }
         processor.run(inputData, outputData)
 
         return translator.postProcessOutput(outputData)
     }
 
     class Builder<I, O> {
-        var inputClass: Class<I>? = null
-        var outputClass: Class<O>? = null
+        lateinit var processor: PROCESSOR_TYPE
+        private var inputClass: Class<I>? = null
+        private var outputClass: Class<O>? = null
         lateinit var model: ByteArray
         lateinit var translator: Translator<I, O>
-        var input: I? = null
-        lateinit var modelParams: Model
 
         internal constructor()
 
@@ -58,8 +56,13 @@ class Runner<I, O>(builder: Builder<I, O>) {
             this.outputClass = outputClass
         }
 
-        fun <I, O> setInputOutputTypes(inputClass: Class<I>, outputClass: Class<O>): Builder<I, O> {
+        fun <I, O> setTypes(inputClass: Class<I>, outputClass: Class<O>): Builder<I, O> {
             return Builder(inputClass, outputClass)
+        }
+
+        fun setProcessor(processor: PROCESSOR_TYPE): Builder<I, O> {
+            this.processor = processor
+            return this
         }
 
         fun setModel(model: ByteArray): Builder<I, O> {
@@ -69,16 +72,6 @@ class Runner<I, O>(builder: Builder<I, O>) {
 
         fun setTranslator(translator: Translator<I, O>): Builder<I, O> {
             this.translator = translator
-            return this
-        }
-
-        fun setInput(input: I): Builder<I, O> {
-            this.input = input
-            return this
-        }
-
-        fun setModelParams(modelParams: Model): Builder<I, O> {
-            this.modelParams = modelParams
             return this
         }
 
