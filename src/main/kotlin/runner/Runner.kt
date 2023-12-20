@@ -4,8 +4,10 @@ import core.processor.onnx.OnnxProcessor
 import core.processor.tflite.TfLiteProcessor
 import core.tensor.Tensor
 import core.tensor.TensorFactory
+import core.transform.Transform
 import core.translator.Translator
 import model.PROCESSOR_TYPE
+import java.util.*
 
 
 /**
@@ -16,15 +18,17 @@ class Runner<I, O>(builder: Builder<I, O>) {
     private var processor: PROCESSOR_TYPE
     private var model: ByteArray
     private var translator: Translator<I, O>
+    private var pipeline: LinkedList<Transform>
 
     init {
         this.processor = builder.processor
         this.model = builder.model
         this.translator = builder.translator
+        this.pipeline = builder.pipeline
     }
 
     fun getResult(input: I): O {
-        val inputData = translator.preProcessInput(input)
+        val inputData = translator.preProcessInput(input, pipeline)
 
         val processor = when (this.processor) {
             PROCESSOR_TYPE.ONNX -> OnnxProcessor(this.model)
@@ -44,10 +48,11 @@ class Runner<I, O>(builder: Builder<I, O>) {
 
     class Builder<I, O> {
         lateinit var processor: PROCESSOR_TYPE
-        private var inputClass: Class<I>? = null
-        private var outputClass: Class<O>? = null
         lateinit var model: ByteArray
         lateinit var translator: Translator<I, O>
+        lateinit var pipeline: LinkedList<Transform>
+        private var inputClass: Class<I>? = null
+        private var outputClass: Class<O>? = null
 
         internal constructor()
 
@@ -72,6 +77,11 @@ class Runner<I, O>(builder: Builder<I, O>) {
 
         fun setTranslator(translator: Translator<I, O>): Builder<I, O> {
             this.translator = translator
+            return this
+        }
+
+        fun addTransform(transform: Transform): Builder<I, O> {
+            this.pipeline.addLast(transform)
             return this
         }
 
