@@ -1,6 +1,6 @@
-package core.translator
+package net.iriscan.translator
 
-import core.tensor.Tensor
+import net.iriscan.tensor.Tensor
 
 /**
  * @author Anton Kurinnoy
