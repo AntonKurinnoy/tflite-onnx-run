@@ -1,7 +1,7 @@
-package core.processor.tflite
+package net.iriscan.processor.tflite
 
-import core.processor.Processor
-import core.tensor.Tensor
+import net.iriscan.processor.Processor
+import net.iriscan.tensor.Tensor
 
 /**
  * @author Anton Kurinnoy

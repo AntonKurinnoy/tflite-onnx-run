@@ -1,6 +1,6 @@
-package core.processor.onnx
+package net.iriscan.processor.onnx
 
-import core.tensor.Shape
+import net.iriscan.tensor.Shape
 
 /**
  * @author Anton Kurinnoy

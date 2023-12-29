@@ -1,6 +1,6 @@
-package core.processor
+package net.iriscan.processor
 
-import core.tensor.Tensor
+import net.iriscan.tensor.Tensor
 import java.io.Closeable
 
 /**

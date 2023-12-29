@@ -1,11 +1,11 @@
-package core.processor.onnx
+package net.iriscan.processor.onnx
 
 import ai.onnxruntime.OnnxTensor
 import ai.onnxruntime.OrtEnvironment
 import ai.onnxruntime.OrtSession
-import core.processor.Processor
-import core.tensor.Tensor
-import core.tensor.TensorType
+import net.iriscan.processor.Processor
+import net.iriscan.tensor.Tensor
+import net.iriscan.tensor.TensorType
 import java.nio.FloatBuffer
 import java.nio.IntBuffer
 

@@ -1,4 +1,4 @@
-package core.tensor
+package net.iriscan.tensor
 
 import java.nio.Buffer
 
