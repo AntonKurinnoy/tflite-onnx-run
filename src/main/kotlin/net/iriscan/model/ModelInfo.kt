@@ -1,9 +1,9 @@
-package model
+package net.iriscan.model
 
 /**
  * @author Anton Kurinnoy
  */
-data class Model(
+data class ModelInfo(
     val name: String,
     val type: MODEL_TYPE,
     val processor: PROCESSOR_TYPE,

@@ -1,23 +1,21 @@
-package runner
+package net.iriscan.model
 
-import core.translator.Translator
-import model.Model
+import net.iriscan.translator.Translator
 import java.io.ByteArrayOutputStream
 import java.math.BigInteger
 import java.net.URL
 import java.security.MessageDigest
 
-
 /**
  * @author Anton Kurinnoy
  */
-object RunnerFactory {
-    fun <I, O> createFromModel(
-        model: Model,
+object ModelFactory {
+    fun <I, O> create(
+        model: ModelInfo,
         inputClass: Class<I>,
         outputClass: Class<O>,
         translator: Translator<I, O>
-    ): Runner<I, O> {
+    ): DefaultModel<I, O> {
 
         val loadedModel = try {
             val url = URL(model.url)
@@ -43,10 +41,26 @@ object RunnerFactory {
             }
         }
 
-        return Runner.builder()
+        return DefaultModel.builder<I, O>()
             .setModel(loadedModel)
             .setTypes(inputClass, outputClass)
             .setProcessor(model.processor)
+            .setTranslator(translator)
+            .build()
+    }
+
+    fun <I, O> create(
+        model: ByteArray,
+        processor: PROCESSOR_TYPE,
+        inputClass: Class<I>,
+        outputClass: Class<O>,
+        translator: Translator<I, O>,
+        builder: DefaultModel.Builder<I, O>
+    ): DefaultModel<I, O> {
+        return builder
+            .setModel(model)
+            .setTypes(inputClass, outputClass)
+            .setProcessor(processor)
             .setTranslator(translator)
             .build()
     }
