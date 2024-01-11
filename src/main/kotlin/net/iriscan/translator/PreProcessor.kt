@@ -5,6 +5,6 @@ import net.iriscan.tensor.Tensor
 /**
  * @author Anton Kurinnoy
  */
-interface PreProcessor<I> {
+interface PreProcessor<in I> {
     fun preProcessInput(input: I): Map<Int, Tensor>
 }

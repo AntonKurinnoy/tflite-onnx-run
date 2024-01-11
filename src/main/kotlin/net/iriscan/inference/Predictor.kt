@@ -12,7 +12,7 @@ import net.iriscan.translator.Translator
 /**
  * @author Anton Kurinnoy
  */
-interface Predictor<I, O> {
+interface Predictor<in I, out O> {
     fun predict(input: I): O
 }
 
