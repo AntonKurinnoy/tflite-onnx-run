@@ -19,7 +19,7 @@ sealed class Input(val type: INPUT_TYPE)
 data class RGBInputData(
     val order: ORDER_TYPE,
     val shape: IntArray,
-    val normalization: Array<String>,
+    val normalization: Array<FloatArray>,
 ) : Input(type = INPUT_TYPE.RGB)
 
 sealed class Output(val type: OUTPUT_TYPE)
@@ -29,6 +29,7 @@ data class MaskScoreOutputData(
     val shape: IntArray,
     val method: String,
     val threshold: Double,
+    val sign: String,
     val classes: Array<String>
 ) : Output(type = OUTPUT_TYPE.MASK_SCORE)
 
@@ -37,6 +38,7 @@ data class MaskOutputData(
     val shape: IntArray,
     val method: String,
     val threshold: Double,
+    val sign: String,
     val classes: Array<String>
 ) : Output(type = OUTPUT_TYPE.MASK)
 
@@ -47,6 +49,7 @@ data class TemplateOutputData(
 
 data class ScoresBoxesOutputData(
     val outputOrder: Array<String>,
+    val threshold: Double,
     val bboxType: BBOX_TYPE,
 ) : Output(type = OUTPUT_TYPE.SCORES_BOXES)
 
