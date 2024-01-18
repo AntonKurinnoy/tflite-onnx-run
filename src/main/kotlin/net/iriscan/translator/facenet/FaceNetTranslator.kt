@@ -1,10 +1,12 @@
 package net.iriscan.translator.facenet
 
+import ai.onnxruntime.OnnxTensor
 import net.iriscan.tensor.Tensor
 import net.iriscan.transform.Transform
 import net.iriscan.translator.ImageBiometricRecognitionTranslator
 import net.iriscan.translator.ImageBiometricRecognitionTranslatorBuilder
 import net.iriscan.translator.Template
+import java.awt.image.BufferedImage
 
 /**
  * @author Anton Kurinnoy
@@ -17,8 +19,8 @@ class FaceRecognitionTranslator(
     transformList: List<Transform>
 ) : ImageBiometricRecognitionTranslator(inputWidth, inputHeight, meanList, stdList, transformList) {
 
-    override fun postProcessOutput(output: Map<Int, Tensor>): Template {
-        TODO("Not yet implemented")
+    override fun postProcessOutput(input: BufferedImage, output: Map<String, Tensor>): Template {
+        return output["1207"]!!.data.rewind().array() as FloatArray
     }
 }
 
