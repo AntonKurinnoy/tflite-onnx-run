@@ -11,7 +11,7 @@ class TfLiteProcessor(val model: ByteArray) : Processor {
         TODO("Not yet implemented")
     }
 
-    override fun run(input: Map<Int, Tensor>, output: MutableMap<Int, Tensor>) {
+    override fun run(input: Map<Int, Tensor>): Map<String, Tensor> {
         TODO("Not yet implemented")
     }
 

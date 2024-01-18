@@ -19,7 +19,7 @@ class OnnxProcessor(model: ByteArray) : Processor {
     override fun initialize() {
     }
 
-    override fun run(input: Map<Int, Tensor>, output: MutableMap<Int, Tensor>) {
+    override fun run(input: Map<Int, Tensor>): Map<String, Tensor> {
         if (input.keys.max() >= session.numInputs) {
             throw IllegalArgumentException("Illegal index:${input.keys.max()}")
         }
@@ -30,10 +30,11 @@ class OnnxProcessor(model: ByteArray) : Processor {
 
         val results = session.run(onnxInputTensors)
 
-        for ((index, value) in results.withIndex()) {
-            val inputTensor = input[index]
-            val data = (value as OnnxTensor).byteBuffer
-            output[index] = Tensor(inputTensor!!.shape, data, inputTensor.type)
+        return results.associate {
+            val shape = (it.value as OnnxTensor).info.shape.map { shapeItem -> shapeItem.toInt() }.toIntArray()
+            val type = (it.value as OnnxTensor).info.type.name
+            val floatBuffer = (it.value as OnnxTensor).floatBuffer
+            it.key to Tensor(shape, floatBuffer, TensorType.valueOf(type))
         }
     }
 
@@ -49,15 +50,17 @@ class OnnxProcessor(model: ByteArray) : Processor {
         return when (inputTensor.type) {
             TensorType.INT -> OnnxTensor.createTensor(
                 OrtEnvironment.getEnvironment(),
-                inputTensor.data.array() as IntBuffer,
+                inputTensor.data as IntBuffer,
                 inputTensor.shape.toOnnxShape()
             )
 
-            TensorType.FLOAT -> OnnxTensor.createTensor(
-                OrtEnvironment.getEnvironment(),
-                inputTensor.data.array() as FloatBuffer,
-                inputTensor.shape.toOnnxShape()
-            )
+            TensorType.FLOAT -> {
+                OnnxTensor.createTensor(
+                    OrtEnvironment.getEnvironment(),
+                    inputTensor.data as FloatBuffer,
+                    inputTensor.shape.toOnnxShape()
+                )
+            }
         }
     }
 }

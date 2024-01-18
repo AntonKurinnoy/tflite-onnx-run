@@ -8,5 +8,5 @@ import java.io.Closeable
  */
 interface Processor : Closeable {
     fun initialize()
-    fun run(input: Map<Int, Tensor>, output: MutableMap<Int, Tensor>)
+    fun run(input: Map<Int, Tensor>): Map<String, Tensor>
 }
