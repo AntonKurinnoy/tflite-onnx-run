@@ -4,6 +4,7 @@ import net.iriscan.tensor.Tensor
 import net.iriscan.transform.Transform
 import net.iriscan.translator.ImageBiometricLivenessTranslator
 import net.iriscan.translator.ImageBiometricLivenessTranslatorBuilder
+import java.awt.image.BufferedImage
 
 /**
  * @author Anton Kurinnoy
@@ -27,8 +28,22 @@ class LivenessTranslator(
         this.sign = sign
     }
 
-    override fun postProcessOutput(output: Map<Int, Tensor>): Boolean {
-        TODO("Not yet implemented")
+    override fun postProcessOutput(input: BufferedImage, output: Map<String, Tensor>): Boolean {
+        val mask = output["output0"]!!.data.rewind().array() as FloatArray
+
+        return compareNumbers(mask.average().toFloat(), threshold, sign)
+    }
+
+    private fun compareNumbers(number1: Float, number2: Float, sign: String): Boolean {
+        return when (sign) {
+            ">" -> number1 > number2
+            "<" -> number1 < number2
+            ">=" -> number1 >= number2
+            "<=" -> number1 <= number2
+            "==" -> number1 == number2
+            "!=" -> number1 != number2
+            else -> throw IllegalArgumentException("Invalid sign: $sign")
+        }
     }
 }
 
