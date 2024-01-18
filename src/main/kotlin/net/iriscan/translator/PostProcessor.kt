@@ -5,6 +5,6 @@ import net.iriscan.tensor.Tensor
 /**
  * @author Anton Kurinnoy
  */
-interface PostProcessor<out O> {
-    fun postProcessOutput(output: Map<Int, Tensor>): O
+interface PostProcessor<in I, out O> {
+    fun postProcessOutput(input: I, output: Map<String, Tensor>): O
 }
