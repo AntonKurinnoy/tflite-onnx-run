@@ -12,7 +12,7 @@ import kotlin.properties.Delegates
 /**
  * @author Anton Kurinnoy
  */
-interface Translator<in I, out O> : PreProcessor<I>, PostProcessor<O>
+interface Translator<in I, out O> : PreProcessor<I>, PostProcessor<I, O>
 
 typealias Pipeline = LinkedList<Transform>
 
@@ -25,10 +25,13 @@ abstract class ImageTranslator<O>(
 ) : Translator<BufferedImage, O> {
 
     private val pipeline: Pipeline = Pipeline()
+    private val newWidth: Int
+    private val newHeight: Int
 
     init {
-        addTransform(ResizeImage(inputWidth, inputHeight))
-        for (i in 0..meanList.size) {
+        this.newWidth = inputWidth
+        this.newHeight = inputHeight
+        for (i in meanList.indices) {
             addTransform(Normalization(meanList[i], stdList[i]))
         }
         customTransformsList.forEach { addTransform(it) }
@@ -39,7 +42,8 @@ abstract class ImageTranslator<O>(
     }
 
     override fun preProcessInput(input: BufferedImage): Map<Int, Tensor> {
-        val inputTensor = TensorFactory.fromImage(input)
+        val resizedImage = ResizeImage.transform(input, newWidth, newHeight)
+        val inputTensor = TensorFactory.fromImage(resizedImage)
 
         val transformedTensor = pipeline.fold(inputTensor) { acc, transform ->
             transform.transform(acc)
@@ -55,7 +59,7 @@ abstract class ImageTranslatorBuilder<out OT : ImageTranslator<*>, out OB> {
     protected var inputHeight by Delegates.notNull<Int>()
     protected lateinit var meanList: List<FloatArray>
     protected lateinit var stdList: List<FloatArray>
-    protected lateinit var transformList: List<Transform>
+    protected var transformList: List<Transform> = emptyList()
 
     fun setSize(width: Int, height: Int): OB {
         this.inputWidth = width
