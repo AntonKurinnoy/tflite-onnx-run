@@ -1,6 +1,5 @@
 package net.iriscan.translator.facenet
 
-import ai.onnxruntime.OnnxTensor
 import net.iriscan.tensor.Tensor
 import net.iriscan.transform.Transform
 import net.iriscan.translator.ImageBiometricRecognitionTranslator
@@ -20,7 +19,8 @@ class FaceRecognitionTranslator(
 ) : ImageBiometricRecognitionTranslator(inputWidth, inputHeight, meanList, stdList, transformList) {
 
     override fun postProcessOutput(input: BufferedImage, output: Map<String, Tensor>): Template {
-        return output["1207"]!!.data.rewind().array() as FloatArray
+        val template = output.entries.firstOrNull() ?: throw IllegalStateException("Template data is null")
+        return template.value.data.rewind().array() as FloatArray
     }
 }
 
