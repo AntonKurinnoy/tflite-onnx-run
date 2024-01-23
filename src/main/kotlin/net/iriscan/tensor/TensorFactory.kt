@@ -24,12 +24,13 @@ object TensorFactory {
             }
         }
 
-        return create(intArrayOf(1, 3, image.width, image.height), floatArray)
+        return create(intArrayOf(1, 3, height, width), floatArray)
     }
 
     fun create(shape: Shape, data: Float): Tensor {
         val floatBuffer = FloatBuffer.allocate(1)
         floatBuffer.put(data)
+        floatBuffer.rewind()
 
         return Tensor(shape, floatBuffer, TensorType.FLOAT)
     }
@@ -37,6 +38,7 @@ object TensorFactory {
     fun create(shape: Shape, data: FloatArray): Tensor {
         val floatBuffer = FloatBuffer.allocate(data.size)
         floatBuffer.put(data)
+        floatBuffer.rewind()
 
         return Tensor(shape, floatBuffer, TensorType.FLOAT)
     }
