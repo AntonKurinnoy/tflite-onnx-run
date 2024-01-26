@@ -1,5 +1,6 @@
 package net.iriscan.translator.deepixbis
 
+import net.iriscan.model.ORDER_TYPE
 import net.iriscan.tensor.Tensor
 import net.iriscan.transform.Transform
 import net.iriscan.translator.ImageBiometricLivenessTranslator
@@ -12,13 +13,14 @@ import java.awt.image.BufferedImage
 class LivenessTranslator(
     inputWidth: Int,
     inputHeight: Int,
+    order: ORDER_TYPE,
     meanList: List<FloatArray>,
     stdList: List<FloatArray>,
     transformList: List<Transform>,
     threshold: Float,
     sign: String
 ) :
-    ImageBiometricLivenessTranslator(inputWidth, inputHeight, meanList, stdList, transformList) {
+    ImageBiometricLivenessTranslator(inputWidth, inputHeight, order, meanList, stdList, transformList) {
 
     private val threshold: Float
     private val sign: String
@@ -73,6 +75,6 @@ class LivenessTranslatorBuilder : ImageBiometricLivenessTranslatorBuilder() {
     }
 
     override fun build(): LivenessTranslator {
-        return LivenessTranslator(inputWidth, inputHeight, meanList, stdList, transformList, threshold, sign)
+        return LivenessTranslator(inputWidth, inputHeight, order, meanList, stdList, transformList, threshold, sign)
     }
 }

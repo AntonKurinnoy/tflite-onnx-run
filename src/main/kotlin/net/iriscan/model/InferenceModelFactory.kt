@@ -1,9 +1,9 @@
 package net.iriscan.model
 
 import net.iriscan.translator.Translator
-import net.iriscan.translator.deepixbis.FaceDetectionTranslatorBuilder
+import net.iriscan.translator.deepixbis.LivenessTranslatorBuilder
 import net.iriscan.translator.facenet.FaceRecognitionTranslatorBuilder
-import net.iriscan.translator.liveness.LivenessTranslatorBuilder
+import net.iriscan.translator.retinaface.FaceDetectionTranslatorBuilder
 import java.io.ByteArrayOutputStream
 import java.math.BigInteger
 import java.net.URL
@@ -43,7 +43,7 @@ object InferenceModelFactory {
         val height = rgbInputData.shape[rgbInputData.shape.size - 2]
         val meanList = mutableListOf<FloatArray>()
         val stdList = mutableListOf<FloatArray>()
-        for (i in 0..rgbInputData.normalization.size step 2) {
+        for (i in 0 until rgbInputData.normalization.size step 2) {
             meanList.add(rgbInputData.normalization[i])
             stdList.add(rgbInputData.normalization[i + 1])
         }
@@ -53,6 +53,7 @@ object InferenceModelFactory {
                 val threshold = (model.output as ScoresBoxesOutputData).threshold.toFloat()
                 FaceDetectionTranslatorBuilder.newBuilder()
                     .setSize(width, height)
+                    .setOrder(rgbInputData.order)
                     .setNormalizeParams(meanList, stdList)
                     .setThreshold(threshold)
                     .build()
@@ -60,6 +61,7 @@ object InferenceModelFactory {
 
             MODEL_TYPE.FACE_RECOGNITION -> FaceRecognitionTranslatorBuilder.newBuilder()
                 .setSize(width, height)
+                .setOrder(rgbInputData.order)
                 .setNormalizeParams(meanList, stdList)
                 .build()
 
@@ -68,6 +70,7 @@ object InferenceModelFactory {
                 val sign = model.output.sign
                 LivenessTranslatorBuilder.newBuilder()
                     .setSize(width, height)
+                    .setOrder(rgbInputData.order)
                     .setNormalizeParams(meanList, stdList)
                     .setThreshold(threshold)
                     .setSign(sign)
@@ -82,7 +85,7 @@ object InferenceModelFactory {
             .build()
     }
 
-    fun <I, O> create(jsonFile: String): InferenceModel<I, O> {
+    fun <I, O> create(jsonFilePath: String): InferenceModel<I, O> {
         TODO()
     }
 }

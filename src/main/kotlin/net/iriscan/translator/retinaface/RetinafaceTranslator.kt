@@ -1,6 +1,7 @@
 package net.iriscan.translator.retinaface
 
 import ai.onnxruntime.OrtUtil
+import net.iriscan.model.ORDER_TYPE
 import net.iriscan.tensor.Tensor
 import net.iriscan.transform.Transform
 import net.iriscan.translator.Box
@@ -15,11 +16,12 @@ import java.awt.image.BufferedImage
 class FaceDetectionTranslator(
     inputWidth: Int,
     inputHeight: Int,
+    order: ORDER_TYPE,
     meanList: List<FloatArray>,
     stdList: List<FloatArray>,
     transformList: List<Transform>,
     threshold: Float
-) : ImageBiometricDetectionTranslator(inputWidth, inputHeight, meanList, stdList, transformList) {
+) : ImageBiometricDetectionTranslator(inputWidth, inputHeight, order, meanList, stdList, transformList) {
 
     private val threshold: Float
 
@@ -195,6 +197,6 @@ class FaceDetectionTranslatorBuilder : ImageBiometricDetectionTranslatorBuilder(
     }
 
     override fun build(): FaceDetectionTranslator {
-        return FaceDetectionTranslator(inputWidth, inputHeight, meanList, stdList, transformList, threshold)
+        return FaceDetectionTranslator(inputWidth, inputHeight, order, meanList, stdList, transformList, threshold)
     }
 }

@@ -1,5 +1,6 @@
 package net.iriscan.translator.facenet
 
+import net.iriscan.model.ORDER_TYPE
 import net.iriscan.tensor.Tensor
 import net.iriscan.transform.Transform
 import net.iriscan.translator.ImageBiometricRecognitionTranslator
@@ -13,10 +14,11 @@ import java.awt.image.BufferedImage
 class FaceRecognitionTranslator(
     inputWidth: Int,
     inputHeight: Int,
+    order: ORDER_TYPE,
     meanList: List<FloatArray>,
     stdList: List<FloatArray>,
     transformList: List<Transform>
-) : ImageBiometricRecognitionTranslator(inputWidth, inputHeight, meanList, stdList, transformList) {
+) : ImageBiometricRecognitionTranslator(inputWidth, inputHeight, order, meanList, stdList, transformList) {
 
     override fun postProcessOutput(input: BufferedImage, output: Map<String, Tensor>): Template {
         val template = output.entries.firstOrNull() ?: throw IllegalStateException("Template data is null")
@@ -37,6 +39,6 @@ class FaceRecognitionTranslatorBuilder : ImageBiometricRecognitionTranslatorBuil
     }
 
     override fun build(): FaceRecognitionTranslator {
-        return FaceRecognitionTranslator(inputWidth, inputHeight, meanList, stdList, transformList)
+        return FaceRecognitionTranslator(inputWidth, inputHeight, order, meanList, stdList, transformList)
     }
 }
