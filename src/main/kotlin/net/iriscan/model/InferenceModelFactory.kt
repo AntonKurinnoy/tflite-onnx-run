@@ -1,5 +1,7 @@
 package net.iriscan.model
 
+import net.iriscan.processor.onnx.OnnxProcessor
+import net.iriscan.processor.tflite.TfLiteProcessor
 import net.iriscan.translator.Translator
 import net.iriscan.translator.deepixbis.LivenessTranslatorBuilder
 import net.iriscan.translator.facenet.FaceRecognitionTranslatorBuilder
@@ -38,6 +40,10 @@ object InferenceModelFactory {
             }
         }
 
+        val processor = when (model.processor) {
+            PROCESSOR_TYPE.ONNX -> OnnxProcessor(loadedModel)
+            PROCESSOR_TYPE.TFLITE -> TfLiteProcessor(loadedModel)
+        }
         val rgbInputData = model.input as RGBInputData
         val width = rgbInputData.shape.last()
         val height = rgbInputData.shape[rgbInputData.shape.size - 2]
@@ -79,8 +85,7 @@ object InferenceModelFactory {
         }
 
         return InferenceModelBuilder.newBuilder<I, O>()
-            .setModel(loadedModel)
-            .setProcessor(model.processor)
+            .setProcessor(processor)
             .setTranslator(translator as Translator<I, O>)
             .build()
     }

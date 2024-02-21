@@ -1,9 +1,6 @@
 package net.iriscan.inference
 
-import net.iriscan.model.PROCESSOR_TYPE
 import net.iriscan.processor.Processor
-import net.iriscan.processor.onnx.OnnxProcessor
-import net.iriscan.processor.tflite.TfLiteProcessor
 import net.iriscan.translator.Translator
 
 
@@ -14,17 +11,14 @@ interface Predictor<in I, out O> {
     fun predict(input: I): O
 }
 
-internal class DefaultPredictor<I, O>(model: ByteArray, translator: Translator<I, O>, processorType: PROCESSOR_TYPE) :
+internal class DefaultPredictor<I, O>(processor: Processor, translator: Translator<I, O>) :
     Predictor<I, O> {
     private val translator: Translator<I, O>
     private val processor: Processor
 
     init {
         this.translator = translator
-        this.processor = when (processorType) {
-            PROCESSOR_TYPE.ONNX -> OnnxProcessor(model)
-            PROCESSOR_TYPE.TFLITE -> TfLiteProcessor(model)
-        }
+        this.processor = processor
     }
 
     override fun predict(input: I): O {
