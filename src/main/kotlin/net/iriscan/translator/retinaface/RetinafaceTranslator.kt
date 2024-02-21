@@ -1,6 +1,5 @@
 package net.iriscan.translator.retinaface
 
-import ai.onnxruntime.OrtUtil
 import net.iriscan.model.ORDER_TYPE
 import net.iriscan.tensor.Tensor
 import net.iriscan.transform.Transform
@@ -36,10 +35,8 @@ class FaceDetectionTranslator(
         val boxes = output.entries.lastOrNull() ?: throw IllegalStateException("Boxes data is null")
         val scoresArray = scores.value.data.rewind().array() as FloatArray
         val boxesArray = boxes.value.data.rewind().array() as FloatArray
-        val scoresSize = scoresArray.size / 2
-        val boxesSize = boxesArray.size / 4
-        val scoresReshaped = OrtUtil.reshape(scoresArray, longArrayOf(scoresSize.toLong(), 2)) as Array<FloatArray>
-        val boxesReshaped = OrtUtil.reshape(boxesArray, longArrayOf(boxesSize.toLong(), 4)) as Array<FloatArray>
+        val scoresReshaped = splitArrayIntoSubarrays(scoresArray, 2)
+        val boxesReshaped = splitArrayIntoSubarrays(boxesArray, 4)
         val (boxesPost, labels, scoresPost) = postprocessResult(
             startWidth,
             startHeight,
@@ -175,6 +172,21 @@ class FaceDetectionTranslator(
         }
 
         return overlapAreas
+    }
+
+    private fun splitArrayIntoSubarrays(array: FloatArray, subarraySize: Int): Array<FloatArray> {
+        val result = mutableListOf<FloatArray>()
+        var startIndex = 0
+
+        while (startIndex < array.size) {
+            val endIndex = startIndex + subarraySize
+            val subList = array.slice(startIndex until endIndex)
+            result.add(subList.toFloatArray())
+            startIndex = endIndex
+        }
+
+
+        return result.toTypedArray()
     }
 }
 
